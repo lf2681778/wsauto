@@ -1,0 +1,22 @@
+name: Daily Auto Open
+on:
+  schedule:
+    - cron: '00 3 * * *' 
+  workflow_dispatch:
+
+jobs:
+  update-status:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - name: 安裝讀取 Excel 的套件
+        run: npm install xlsx
+      - name: 執行自動更新腳本
+        env:
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          CHAIN_ID: ${{ secrets.CHAIN_ID }}
+        run: node main.js
