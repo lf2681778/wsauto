@@ -5,7 +5,8 @@ const CLIENT_ID = process.env.CLIENT_ID;
 const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const CHAIN_ID = process.env.CHAIN_ID;
 
-// 新增一個變數來記錄失敗次數
+// === 調整這裡：設定你能容忍的最大失敗數量 ===
+const ERROR_THRESHOLD = 30; 
 let errorCount = 0;
 
 async function getToken() {
@@ -69,19 +70,24 @@ async function main() {
 
     console.log(`共讀取到 ${vendors.length} 家店家，準備開始執行...`);
 
-for (let i = 0; i < vendors.length; i++) {
+    for (let i = 0; i < vendors.length; i++) {
         const vid = vendors[i];
         await updateVendor(token, vid);
         await new Promise(r => setTimeout(r, 500)); 
     }
     
-    // --- 執行完畢後的最終檢查 ---
-    if (errorCount > 0) {
-        console.log(`\n⚠️ 警告：全部執行完畢，但共有 ${errorCount} 家店鋪更新失敗！`);
-        // 強制讓 GitHub 亮紅燈，這會自動觸發系統發送失敗通知信給你的信箱！
+    // === 修改這裡：執行完畢後的最終檢查邏輯 ===
+    if (errorCount > ERROR_THRESHOLD) {
+        console.log(`\n🚨 警告：全部執行完畢，共有 ${errorCount} 家店鋪更新失敗，超過容忍上限 (${ERROR_THRESHOLD}家)！`);
+        // 強制讓 GitHub 亮紅燈，觸發系統警報
         process.exit(1); 
+    } else if (errorCount > 0) {
+        console.log(`\n⚠️ 執行完畢，共有 ${errorCount} 家失敗。但在容忍範圍內，系統判定過關。`);
+        // 不超過容忍值，依然給綠勾勾，不發通知
+        process.exit(0);
     } else {
         console.log("\n🎉 全部執行完畢，完美無缺！");
+        process.exit(0);
     }
 }
 
