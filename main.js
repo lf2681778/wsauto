@@ -6,7 +6,7 @@ const CLIENT_SECRET = process.env.CLIENT_SECRET;
 const CHAIN_ID = process.env.CHAIN_ID;
 
 // === 你可以在這裡修改容忍值 ===
-const ERROR_THRESHOLD = 30; 
+const ERROR_THRESHOLD = 50; 
 let errorCount = 0;
 let successCount = 0; 
 
