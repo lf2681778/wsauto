@@ -21,10 +21,20 @@ jobs:
           CHAIN_ID: ${{ secrets.CHAIN_ID }}
         run: node main.js
         
-      - name: 傳送 Discord 錯誤通知
-        if: always()
+# === 第一種情況：當腳本亮紅燈 (超過容忍值) 時觸發 ===
+      - name: 傳送 Discord 通知 (❌ 超過容忍值)
+        if: failure()
         run: |
           curl -H "Content-Type: application/json" \
           -X POST \
-          -d '{"content": "🚨 **Watsons排程結果**\n✅ 成功：`${{ steps.run_script.outputs.success_count }}` 筆\n❌ 失敗：`${{ steps.run_script.outputs.error_count }}` 筆\n目前失敗數量已超過容忍值，請盡速上 GitHub 檢查！"}' \
+          -d '{"content": "🚨 **Watsons排程結果 (異常)**\n✅ 成功：`${{ steps.run_script.outputs.success_count }}` 筆\n❌ 失敗：`${{ steps.run_script.outputs.error_count }}` 筆\n目前失敗數量已超過容忍值，請檢察系統是否異常！"}' \
+          ${{ secrets.DISCORD_WEBHOOK }}
+
+      # === 第二種情況：當腳本亮綠燈 (在容忍值以內) 時觸發 ===
+      - name: 傳送 Discord 通知 (✅ 安全範圍內)
+        if: success()
+        run: |
+          curl -H "Content-Type: application/json" \
+          -X POST \
+          -d '{"content": "🟢 **Watsons排程結果 (正常)**\n✅ 成功：`${{ steps.run_script.outputs.success_count }}` 筆\n❌ 失敗：`${{ steps.run_script.outputs.error_count }}` 筆\n失敗數量在容忍範圍內，系統正常！"}' \
           ${{ secrets.DISCORD_WEBHOOK }}
