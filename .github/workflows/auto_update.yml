@@ -22,7 +22,7 @@ jobs:
         run: node main.js
         
       - name: 傳送 Discord 錯誤通知
-        if: failure()
+        if: always()
         run: |
           curl -H "Content-Type: application/json" \
           -X POST \
