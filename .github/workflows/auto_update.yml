@@ -1,6 +1,6 @@
 name: Daily Auto Open
 on:
-  workflow_dispatch: # 手動觸發按鈕
+  workflow_dispatch:
 
 jobs:
   update-status:
@@ -12,16 +12,19 @@ jobs:
           node-version: '18'
       - name: 安裝讀取 Excel 的套件
         run: npm install xlsx
+        
       - name: 執行自動更新腳本
+        id: run_script
         env:
           CLIENT_ID: ${{ secrets.CLIENT_ID }}
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           CHAIN_ID: ${{ secrets.CHAIN_ID }}
         run: node main.js
+        
       - name: 傳送 Discord 錯誤通知
         if: failure()
         run: |
           curl -H "Content-Type: application/json" \
           -X POST \
-          -d '{"content": "🚨 **警告！**Watsons自動排程開店發生錯誤或超過容錯值，請趕緊上 GitHub 檢查！"}' \
+          -d '{"content": "🚨 **Watsons排程結果**\n✅ 成功：`${{ steps.run_script.outputs.success_count }}` 筆\n❌ 失敗：`${{ steps.run_script.outputs.error_count }}` 筆\n目前失敗數量已超過容忍值，請盡速上 GitHub 檢查！"}' \
           ${{ secrets.DISCORD_WEBHOOK }}
