@@ -18,3 +18,10 @@ jobs:
           CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
           CHAIN_ID: ${{ secrets.CHAIN_ID }}
         run: node main.js
+      - name: 傳送 Discord 錯誤通知
+        if: failure()
+        run: |
+          curl -H "Content-Type: application/json" \
+          -X POST \
+          -d '{"content": "🚨 **警告！**Watsons自動排程開店發生錯誤或超過容錯值，請趕緊上 GitHub 檢查！"}' \
+          ${{ secrets.DISCORD_WEBHOOK }}
